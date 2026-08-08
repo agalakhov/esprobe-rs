@@ -84,7 +84,9 @@ const fn reserved() -> &'static [(i32, i32, &'static str)] {
             (19, 20, "the USB OTG pair"),
             // No USB Serial/JTAG on this part, so UART0 is the host link and
             // that pair is as unavailable as the flash.
-            (43, 44, "UART0, the link the probe is reached over"),
+            // Only where UART0 actually sits; a board that routes it
+            // elsewhere reserves those pins instead — see `HOST_UART_PINS`.
+            (43, 44, "UART0's default pads"),
         ]
     }
     #[cfg(esp32)]
@@ -134,9 +136,57 @@ const fn default_pins() -> [i32; 5] {
     }
     #[cfg(any(esp32s2, esp32s3))]
     {
-        // Avoids GPIO0/45/46 (strapping), the flash bank, GPIO19/20 (USB) and
-        // GPIO43/44 (UART0, which is the host link on the S2).
-        [4, 5, 6, 17, 18]
+        // Avoids GPIO0/45/46 (strapping), the flash bank and GPIO19/20 (USB).
+        // The target UART sits high, clear of the low pins a board is most
+        // likely to want for the host link when it cannot reach GPIO43/44.
+        [4, 5, 6, 33, 34]
+    }
+}
+
+/// `GPIO_FUNC<n>_OUT_SEL_CFG`'s "take the output enable from `GPIO_ENABLE`"
+/// bit, which is not in the same place on every part.
+///
+/// The Xtensa parts put it at bit 10 and their *output invert* at bit 9; the
+/// RISC-V parts put the enable at 9 and invert at 8. Using the C3's value on an
+/// S2 therefore does two wrong things at once — it inverts the pad and never
+/// enables it — and shows up as a self-test reading back exactly the level it
+/// was not asked for.
+pub const GPIO_FUNC_OEN_SEL: u32 = 1 << oen_sel_shift();
+
+const fn oen_sel_shift() -> u32 {
+    #[cfg(any(esp32, esp32s2, esp32s3))]
+    {
+        10
+    }
+    #[cfg(not(any(esp32, esp32s2, esp32s3)))]
+    {
+        9
+    }
+}
+
+/// Where UART0 lands when this part is the host link: `(TX, RX)`.
+///
+/// UART0 has default pads, but they are only defaults — the GPIO matrix will
+/// put it anywhere, and it has to, because a board is under no obligation to
+/// break the defaults out. The LOLIN S2 Mini does not expose GPIO43/44 at all,
+/// which makes this the difference between a usable board and an unusable one.
+///
+/// Overridden at build time with `HOST_UART_TX` / `HOST_UART_RX`.
+pub const HOST_UART_PINS: (i32, i32) = host_uart_pins();
+
+const fn host_uart_pins() -> (i32, i32) {
+    #[cfg(esp32)]
+    {
+        (1, 3)
+    }
+    #[cfg(any(esp32s2, esp32s3))]
+    {
+        (43, 44)
+    }
+    #[cfg(not(any(esp32, esp32s2, esp32s3)))]
+    {
+        // Parts with USB Serial/JTAG never use this; the value is inert.
+        (-1, -1)
     }
 }
 

@@ -8,13 +8,15 @@
 /// This list went stale once already: it kept naming the pins of a product
 /// that had moved to its own repository, so the five overrides this firmware
 /// actually reads were untracked and changing one rebuilt nothing.
-const TRACKED: [&str; 10] = [
+const TRACKED: [&str; 12] = [
     "PIN_SWDIO",
     "PIN_SWCLK",
     "PIN_RESET",
     "PIN_UART_TX",
     "PIN_UART_RX",
     "UART_BRIDGE_BAUD",
+    "HOST_UART_TX",
+    "HOST_UART_RX",
     "WIFI_SSID",
     "WIFI_PASSWORD",
     "WIFI_SSID_FALLBACK",

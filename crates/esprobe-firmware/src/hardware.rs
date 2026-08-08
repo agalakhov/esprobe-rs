@@ -16,9 +16,13 @@ use esp_idf_svc::hal::gpio::{AnyIOPin, DriveStrength, InputOutput, Pin, PinDrive
 use esp_idf_svc::sys::esp_rom_gpio_connect_in_signal;
 
 use crate::chip::signals::{SPI_CLK_OUT, SPI_D_OUT, SPI_Q_IN};
-
-/// The matrix's "this pad is plain GPIO" selection.
-const SIG_GPIO_OUT_IDX: u32 = 128;
+// The matrix's "this pad is plain GPIO" selection. Chip-specific — 128 on the
+// C3, 256 on the ESP32 and S2 — so it comes from the bindings rather than a
+// literal. Hardcoding the C3's value pointed the S2's pads at a real
+// peripheral signal, and they stopped following the output register: the
+// bridge answered, the wire engine passed its loopback, and only
+// `pad-self-test` showed it, reading back 0 for a pad driven high.
+use esp_idf_svc::sys::SIG_GPIO_OUT_IDX;
 
 use crate::spi_clock::DEFAULT_CLOCK_HZ;
 use crate::swd::SwdIo;
@@ -29,7 +33,7 @@ use crate::chip::GPIO_BASE;
 const GPIO_ENABLE_W1TS: u32 = 0x24;
 const GPIO_ENABLE_W1TC: u32 = 0x28;
 const GPIO_FUNC0_OUT_SEL_CFG: u32 = 0x554;
-const GPIO_FUNC_OEN_SEL: u32 = 1 << 9;
+use crate::chip::GPIO_FUNC_OEN_SEL;
 
 use crate::pads::{ChipPads, Pads, SWCLK as SWCLK_CHANNEL, SWDIO as SWDIO_CHANNEL};
 

@@ -1455,6 +1455,42 @@ mod app {
         None => 921_600,
     };
 
+    /// Where UART0 is routed for the host link.
+    ///
+    /// Defaults to the part's own pads and is overridden per board, because a
+    /// board that does not break those out cannot be used at all otherwise.
+    #[cfg(any(esp32, esp32s2))]
+    const HOST_UART_TX: i32 = match option_env!("HOST_UART_TX") {
+        Some(text) => parse_pin(text),
+        None => esprobe_firmware::chip::HOST_UART_PINS.0,
+    };
+    #[cfg(any(esp32, esp32s2))]
+    const HOST_UART_RX: i32 = match option_env!("HOST_UART_RX") {
+        Some(text) => parse_pin(text),
+        None => esprobe_firmware::chip::HOST_UART_PINS.1,
+    };
+
+    #[cfg(any(esp32, esp32s2))]
+    const fn parse_pin(text: &str) -> i32 {
+        let bytes = text.as_bytes();
+        let mut value = 0i32;
+        let mut index = 0;
+        while index < bytes.len() {
+            let digit = bytes[index];
+            assert!(
+                digit >= b'0' && digit <= b'9',
+                "a pin override must be a number"
+            );
+            value = value * 10 + (digit - b'0') as i32;
+            index += 1;
+        }
+        assert!(
+            value <= esprobe_firmware::chip::MAX_GPIO,
+            "this part has no GPIO that high"
+        );
+        value
+    }
+
     #[cfg(any(esp32, esp32s2))]
     const fn parse_baud(text: &str) -> i32 {
         let bytes = text.as_bytes();
@@ -1493,6 +1529,15 @@ mod app {
         // and `config` stays valid for the duration of the call.
         unsafe {
             esp_idf_svc::sys::esp!(uart_param_config(uart_port_t_UART_NUM_0, &config))?;
+            // Route the port to wherever this board actually brings it out.
+            // Idempotent, and a no-op when the pins are already the defaults.
+            esp_idf_svc::sys::esp!(esp_idf_svc::sys::uart_set_pin(
+                uart_port_t_UART_NUM_0,
+                HOST_UART_TX,
+                HOST_UART_RX,
+                esp_idf_svc::sys::UART_PIN_NO_CHANGE,
+                esp_idf_svc::sys::UART_PIN_NO_CHANGE,
+            ))?;
             esp_idf_svc::sys::esp!(uart_driver_install(
                 uart_port_t_UART_NUM_0,
                 4096,
