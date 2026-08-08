@@ -1054,7 +1054,7 @@ mod app {
     /// The length is the part's GPIO ceiling plus one — indexing it with a pin
     /// the part does not have was a panic at start-up before it was, which is
     /// how the first ESP32 boot ended.
-    #[cfg(not(any(esp32, esp32s2, esp32s3)))]
+    #[cfg(esp32c3)]
     fn numbered_pins(
         pins: esp_idf_svc::hal::gpio::Pins,
     ) -> [Option<AnyIOPin<'static>>; esprobe_firmware::chip::MAX_GPIO as usize + 1] {
@@ -1081,6 +1081,83 @@ mod app {
             Some(pins.gpio19.into()),
             Some(pins.gpio20.into()),
             Some(pins.gpio21.into()),
+        ]
+    }
+
+    /// The ESP32-C6's table.
+    #[cfg(esp32c6)]
+    fn numbered_pins(
+        pins: esp_idf_svc::hal::gpio::Pins,
+    ) -> [Option<AnyIOPin<'static>>; esprobe_firmware::chip::MAX_GPIO as usize + 1] {
+        [
+            Some(pins.gpio0.into()),
+            Some(pins.gpio1.into()),
+            Some(pins.gpio2.into()),
+            Some(pins.gpio3.into()),
+            Some(pins.gpio4.into()),
+            Some(pins.gpio5.into()),
+            Some(pins.gpio6.into()),
+            Some(pins.gpio7.into()),
+            Some(pins.gpio8.into()),
+            Some(pins.gpio9.into()),
+            Some(pins.gpio10.into()),
+            Some(pins.gpio11.into()),
+            Some(pins.gpio12.into()),
+            Some(pins.gpio13.into()),
+            Some(pins.gpio14.into()),
+            Some(pins.gpio15.into()),
+            Some(pins.gpio16.into()),
+            Some(pins.gpio17.into()),
+            Some(pins.gpio18.into()),
+            Some(pins.gpio19.into()),
+            Some(pins.gpio20.into()),
+            Some(pins.gpio21.into()),
+            Some(pins.gpio22.into()),
+            Some(pins.gpio23.into()),
+            Some(pins.gpio24.into()),
+            Some(pins.gpio25.into()),
+            Some(pins.gpio26.into()),
+            Some(pins.gpio27.into()),
+            Some(pins.gpio28.into()),
+            Some(pins.gpio29.into()),
+            Some(pins.gpio30.into()),
+        ]
+    }
+
+    /// The ESP32-H2's table.
+    #[cfg(esp32h2)]
+    fn numbered_pins(
+        pins: esp_idf_svc::hal::gpio::Pins,
+    ) -> [Option<AnyIOPin<'static>>; esprobe_firmware::chip::MAX_GPIO as usize + 1] {
+        [
+            Some(pins.gpio0.into()),
+            Some(pins.gpio1.into()),
+            Some(pins.gpio2.into()),
+            Some(pins.gpio3.into()),
+            Some(pins.gpio4.into()),
+            Some(pins.gpio5.into()),
+            Some(pins.gpio6.into()),
+            Some(pins.gpio7.into()),
+            Some(pins.gpio8.into()),
+            Some(pins.gpio9.into()),
+            Some(pins.gpio10.into()),
+            Some(pins.gpio11.into()),
+            Some(pins.gpio12.into()),
+            Some(pins.gpio13.into()),
+            Some(pins.gpio14.into()),
+            Some(pins.gpio15.into()),
+            Some(pins.gpio16.into()),
+            Some(pins.gpio17.into()),
+            Some(pins.gpio18.into()),
+            Some(pins.gpio19.into()),
+            Some(pins.gpio20.into()),
+            Some(pins.gpio21.into()),
+            Some(pins.gpio22.into()),
+            Some(pins.gpio23.into()),
+            Some(pins.gpio24.into()),
+            Some(pins.gpio25.into()),
+            Some(pins.gpio26.into()),
+            Some(pins.gpio27.into()),
         ]
     }
 

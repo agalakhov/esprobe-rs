@@ -92,11 +92,41 @@ and then does nothing.
 MCU=esp32 ./scripts/build.sh    # original ESP32 (Xtensa; needs espup)
 ```
 
-| part | verified |
-| --- | --- |
-| `esp32c3` | **on hardware** |
-| `esp32` | builds; not yet flashed, see below |
-| `esp32s2`, `esp32s3`, `esp32c6`, `esp32h2` | register maps written, never built |
+| part | host link | status |
+| --- | --- | --- |
+| `esp32c3` | USB Serial/JTAG | **verified on hardware** — debugged an STM32G071 |
+| `esp32` | UART0 | **verified on hardware** |
+| `esp32s2` | UART0 | **verified on hardware** |
+| `esp32s3` | USB Serial/JTAG | **verified on hardware** — debugged an RP2350 |
+| `esp32c6` | USB Serial/JTAG | builds; never run on a board |
+| `esp32h2` | — | does not build: no Wi-Fi peripheral, see below |
+
+"Verified on hardware" means the whole suite on a real board: `pin-map`, released
+levels, reset assert/release, `pad-self-test`, `spi-loopback`, both wire engines,
+and measured round-trip and bulk throughput.
+
+Two of them went further and drove a real target end to end — attach, halt,
+single-step, registers, breakpoints, and memory reads and writes:
+
+| probe | target | notes |
+| --- | --- | --- |
+| ESP32-C3 | STM32G071 | 298 KiB/s bulk read, byte-identical at 8 and 16 MHz |
+| ESP32-S3 | RP2350 | **multi-drop SWD**, 8 hardware breakpoints, SRAM write verified |
+
+The RP2350 result matters beyond one board: multi-drop targets — RP2040, RP2350,
+nRF5340 — need a `TARGETSEL` write that most probes cannot issue, because the
+data phase is not acknowledged. probe-rs works around it by hand-building the
+48-bit packet and pushing it through `swj_sequence`, which this firmware
+supports at 64. So multi-drop works with no code here at all, and that is now a
+measurement rather than an argument.
+
+### The H2 has no Wi-Fi
+
+`esp_idf_svc::wifi` does not exist for it — the part is 802.15.4 and BLE only.
+The network bridge, the provisioning commands and the HTTP surface all assume a
+radio that can join a network, so supporting it means making that layer optional
+rather than adjusting a constant. Its register map is here and is correct; the
+firmware simply does not build for it yet.
 
 What differs between parts lives in `src/chip.rs` — two register bases, the
 GPIO ceiling, the reserved pads, the default pin map — and in the two modules

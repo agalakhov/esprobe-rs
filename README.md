@@ -56,8 +56,20 @@ reports the ARM debug port, which is architectural; naming the part is
 
 ## What works
 
-Verified on an STM32G071 and an STM32F407, over both transports. Nothing in
-the probe is specific to either; both were named with `--target`.
+Four ESP parts run this firmware, verified on real boards, and two of them have
+driven a real target end to end:
+
+| probe | target | proved |
+| --- | --- | --- |
+| ESP32-C3 | STM32G071 | attach, halt, step, registers, flash read at 298 KiB/s |
+| ESP32-S3 | RP2350 | **multi-drop SWD**, 8 breakpoints, SRAM write verified |
+
+The ESP32 and ESP32-S2 pass the full self-test suite on hardware; the C6 builds
+but has not been run; the H2 does not build, because it has no Wi-Fi radio for
+the network transport. See [the firmware README](crates/esprobe-firmware/README.md)
+for the per-part detail.
+
+Nothing in the probe is specific to any target; all were named with `--target`.
 
 | | |
 | --- | ---: |
