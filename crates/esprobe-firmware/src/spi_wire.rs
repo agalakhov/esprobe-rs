@@ -31,14 +31,14 @@ const SPI_USER1: u32 = 0x14;
 const SPI_USER2: u32 = 0x18;
 const SPI_MS_DLEN: u32 = 0x1c;
 const SPI_MISC: u32 = 0x20;
+const SPI_DIN_MODE: u32 = 0x24;
+const SPI_DIN_NUM: u32 = 0x28;
 const SPI_DMA_CONF: u32 = 0x30;
 const SPI_W0: u32 = 0x98;
 const SPI_CLK_GATE: u32 = 0xe8;
 
 const CMD_UPDATE: u32 = 1 << 23;
 const CMD_USR: u32 = 1 << 24;
-const CTRL_RD_BIT_ORDER: u32 = 1 << 25;
-const CTRL_WR_BIT_ORDER: u32 = 1 << 26;
 const USER_USR_MOSI: u32 = 1 << 27;
 const USER_USR_MISO: u32 = 1 << 28;
 const USER_DOUTDIN: u32 = 1 << 0;
@@ -104,7 +104,7 @@ impl SpiWire {
         // Least significant bit first in both directions, as SWD requires.
         write_reg(
             SPI_CTRL,
-            read_reg(SPI_CTRL) | CTRL_RD_BIT_ORDER | CTRL_WR_BIT_ORDER,
+            read_reg(SPI_CTRL) | crate::chip::SPI_CTRL_LSB_FIRST,
         );
         // No command, address, or dummy phase, and no DMA.
         write_reg(SPI_USER1, 0);
@@ -114,6 +114,15 @@ impl SpiWire {
         // puts between these pads and its targets is that board's to switch.
         // ck_idle_edge stays clear, so SWCLK rests low.
         write_reg(SPI_MISC, MISC_CS_DIS_ALL);
+
+        // Sample the input on the same edge that drives it, with no added
+        // delay. These were left at their reset values, which is only safe
+        // while every part resets them the same way — and they do not. A
+        // non-zero input delay shifts the sampled reply by a clock, which
+        // `spi-loopback` reports as one differing bit at the end of the
+        // pattern and which would corrupt every SWD read.
+        write_reg(SPI_DIN_MODE, 0);
+        write_reg(SPI_DIN_NUM, 0);
 
         let mut wire = Self {
             clock_register: 0,

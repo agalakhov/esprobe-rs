@@ -143,6 +143,31 @@ const fn default_pins() -> [i32; 5] {
     }
 }
 
+/// `SPI_CTRL_REG`'s bit-order fields, set to shift LSB first.
+///
+/// SWD is little-endian on the wire, so both directions must be LSB first —
+/// and the fields are not in the same place, nor even the same width, across
+/// the family. The older SPI block has one-bit fields at 25 and 26; the newer
+/// one has *two*-bit fields at 23 and 25. The split is by peripheral
+/// generation rather than by architecture, which is why the S3 sits with the
+/// C6 and H2 here and with the ESP32 and S2 nearly everywhere else.
+///
+/// Writing the older layout's value on a newer part sets one field, half of
+/// another, and leaves the read order MSB first — which shifts the sampled
+/// reply and shows up as `spi-loopback` reporting the wrong bits.
+pub const SPI_CTRL_LSB_FIRST: u32 = spi_ctrl_lsb_first();
+
+const fn spi_ctrl_lsb_first() -> u32 {
+    #[cfg(any(esp32, esp32s2, esp32c3, not(target_os = "espidf")))]
+    {
+        (1 << 25) | (1 << 26)
+    }
+    #[cfg(any(esp32s3, esp32c6, esp32h2))]
+    {
+        (1 << 23) | (1 << 25)
+    }
+}
+
 /// `GPIO_FUNC<n>_OUT_SEL_CFG`'s "take the output enable from `GPIO_ENABLE`"
 /// bit, which is not in the same place on every part.
 ///

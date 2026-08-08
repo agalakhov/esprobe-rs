@@ -1084,6 +1084,66 @@ mod app {
         ]
     }
 
+    /// The ESP32-S3's table. GPIO22..=25 are not bonded out; every other
+    /// number through 48 is a usable pad, which is what makes this part the
+    /// roomiest of the family for a probe.
+    #[cfg(esp32s3)]
+    fn numbered_pins(
+        pins: esp_idf_svc::hal::gpio::Pins,
+    ) -> [Option<AnyIOPin<'static>>; esprobe_firmware::chip::MAX_GPIO as usize + 1] {
+        [
+            Some(pins.gpio0.into()),
+            Some(pins.gpio1.into()),
+            Some(pins.gpio2.into()),
+            Some(pins.gpio3.into()),
+            Some(pins.gpio4.into()),
+            Some(pins.gpio5.into()),
+            Some(pins.gpio6.into()),
+            Some(pins.gpio7.into()),
+            Some(pins.gpio8.into()),
+            Some(pins.gpio9.into()),
+            Some(pins.gpio10.into()),
+            Some(pins.gpio11.into()),
+            Some(pins.gpio12.into()),
+            Some(pins.gpio13.into()),
+            Some(pins.gpio14.into()),
+            Some(pins.gpio15.into()),
+            Some(pins.gpio16.into()),
+            Some(pins.gpio17.into()),
+            Some(pins.gpio18.into()),
+            Some(pins.gpio19.into()),
+            Some(pins.gpio20.into()),
+            Some(pins.gpio21.into()),
+            None, // GPIO22 is not bonded out
+            None, // GPIO23 is not bonded out
+            None, // GPIO24 is not bonded out
+            None, // GPIO25 is not bonded out
+            Some(pins.gpio26.into()),
+            Some(pins.gpio27.into()),
+            Some(pins.gpio28.into()),
+            Some(pins.gpio29.into()),
+            Some(pins.gpio30.into()),
+            Some(pins.gpio31.into()),
+            Some(pins.gpio32.into()),
+            Some(pins.gpio33.into()),
+            Some(pins.gpio34.into()),
+            Some(pins.gpio35.into()),
+            Some(pins.gpio36.into()),
+            Some(pins.gpio37.into()),
+            Some(pins.gpio38.into()),
+            Some(pins.gpio39.into()),
+            Some(pins.gpio40.into()),
+            Some(pins.gpio41.into()),
+            Some(pins.gpio42.into()),
+            Some(pins.gpio43.into()),
+            Some(pins.gpio44.into()),
+            Some(pins.gpio45.into()),
+            Some(pins.gpio46.into()),
+            Some(pins.gpio47.into()),
+            Some(pins.gpio48.into()),
+        ]
+    }
+
     /// The ESP32-S2's table. `None` marks a number the package does not offer
     /// as a drivable pad: GPIO22..=25 are not bonded out, and GPIO46 exists but
     /// is input-only. The compiler settles which is which — `Pins` has no field

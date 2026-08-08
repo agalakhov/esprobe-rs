@@ -1,0 +1,4 @@
+# The S3 has USB Serial/JTAG, so the bridge is reached over it and the console
+# shares that peripheral happily — separate endpoints of the same device.
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+CONFIG_ESP_CONSOLE_UART_DEFAULT=n
