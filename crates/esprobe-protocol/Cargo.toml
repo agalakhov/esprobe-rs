@@ -1,7 +1,10 @@
 [package]
 name = "esprobe-protocol"
 description = "Wire protocol shared by the ESP32-C3 SWD bridge firmware and the esprobe host tool"
-version.workspace = true
+# Pinned rather than inherited: this crate is unchanged since 0.2.0, and
+# republishing an identical crate under a new number is noise for anyone
+# tracking it.
+version = "0.2.0"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true

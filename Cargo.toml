@@ -7,11 +7,17 @@ members = ["crates/esprobe", "crates/esprobe-protocol"]
 exclude = ["crates/esprobe-firmware"]
 
 [workspace.package]
+# 0.2.1: the serial baud rate is settable, for parts reached through a
+# USB-serial chip rather than a native USB endpoint. Purely additive.
+#
 # 0.2.0: the bridge stopped speaking one product's application protocol. The
 # `MuxProbe` opcode left for the board that owns it, opcodes 0x80..=0xfe are
-# reserved for downstream products, and `Command` gained a variant — so this is
-# a wire break as well as an API one, and both ends must be rebuilt together.
-version = "0.2.0"
+# reserved for downstream products, and `Command` gained a variant — so that
+# was a wire break as well as an API one, and both ends had to be rebuilt.
+#
+# `esprobe-protocol` pins its own version: the wire contract has not moved
+# since 0.2.0 and republishing it unchanged helps nobody.
+version = "0.2.1"
 edition = "2024"
 # Let-chains, which both halves use.
 rust-version = "1.88"
